@@ -1,11 +1,12 @@
 <template>
   <div>
     <div>NETWORK is {{ network }}</div>
-    <button v-on:click="connect">ALLO</button>
+    <v-btn color="primary" @click="connect">Connect Keplr</v-btn>
   </div>
 </template>
 
 <script>
+import SigningClient from "../utils/SigningClient";
 export default {
   name: "NetworkView",
   components: {},
@@ -14,13 +15,22 @@ export default {
       network: "",
     };
   },
-  methods() {
-    return {
-      connect() {
-        console.log("ALLO");
-        window.keplr.enable("chihuahua-1");
-      },
-    };
+  methods: {
+    connect: async function () {
+      const chainId = "akashnet-2";
+
+      await window.keplr.enable(chainId);
+      const offlineSigner = await window.getOfflineSignerAuto(chainId);
+      const key = await window.keplr.getKey(chainId);
+      const signingClient = await SigningClient(
+        "https://rpc.cosmos.directory/akash",
+        chainId,
+        "0.0025uakt",
+        offlineSigner,
+        key
+      );
+      console.log(signingClient);
+    },
   },
   created() {
     this.network = this.$route.params.network;

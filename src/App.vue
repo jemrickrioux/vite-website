@@ -27,11 +27,21 @@ body {
 
 <script>
 import Logo from "@/components/Logo.vue";
+
+import { mapGetters } from "vuex";
 export default {
   name: "App",
+  async created() {
+    await this.$store.dispatch("fetchNetworks");
+    await this.$store.dispatch("fetchApy");
+    await this.$store.dispatch("fetchPrices");
+  },
   data: () => ({
     //
   }),
+  computed: {
+    ...mapGetters(["networks", "getApyByName"]),
+  },
   components: {
     Logo,
   },

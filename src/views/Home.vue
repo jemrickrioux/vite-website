@@ -1,7 +1,9 @@
 <template>
   <div class="validator-section">
-    <h2>Networks we support</h2>
-    <Validator v-for="node in nodes" :key="node.address" :node="node" />
+    <h2 class="text-h2">Networks we support</h2>
+    <v-row>
+      <Validator v-for="node in nodes" :key="node.address" :node="node" />
+    </v-row>
   </div>
 </template>
 

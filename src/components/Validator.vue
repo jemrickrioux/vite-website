@@ -1,29 +1,39 @@
 <template>
-  <router-link :to="`/network/${node.name}`">
-    <v-card class="validator" v-if="node.status != 'inactive'">
-      <v-card-title>{{ node.name }}</v-card-title>
-      <div class="val-name">
-        {{ node.name
-        }}<a
-          class="node-link"
+  <v-col>
+    <v-card class="card-container">
+      <router-link :to="`/network/${node.name}`">
+        <div class="d-flex card-body">
+          <div>
+            <v-card-title class="text-h4">{{ node.name }}</v-card-title>
+            <v-card-text>
+              <p>APR: {{ getApyByName(node.name) }} %</p>
+              <p>USD$ {{ getPriceByName(node.name) }}</p>
+              <p class="val-vp">Voting Power: {{ vp }}</p>
+            </v-card-text>
+          </div>
+          <v-card-text class="status">
+            <p :class="node.status">
+              <v-chip label>{{ node.status }}</v-chip>
+            </p></v-card-text
+          >
+        </div>
+      </router-link>
+      <v-card-actions>
+        <v-btn
+          color="primary"
           v-if="node.link != ''"
           :href="node.link"
           target="__blank__"
-        >
-          <ExternalLink />
-        </a>
-      </div>
-      <div class="val-status">
-        <p :class="node.status">{{ node.status }}</p>
-      </div>
-      <div class="val-price">USD${{ price }}</div>
-      <div class="val-vp">Voting Power: {{ vp }}</div>
+          >Explorer</v-btn
+        ><ExternalLink
+      /></v-card-actions>
     </v-card>
-  </router-link>
+  </v-col>
 </template>
 
 <script>
 import ExternalLink from "@/components/ExtenalLink.vue";
+import { mapGetters } from "vuex";
 import axios from "axios";
 import {
   setupStakingExtension,
@@ -44,6 +54,9 @@ export default {
       price: (0.0).toFixed(4),
       vp: 0,
     };
+  },
+  computed: {
+    ...mapGetters(["getApyByName", "getPriceByName"]),
   },
   async created() {
     this.$data.price = await this.getPrice(this.$props.node.coingecko_id);
@@ -102,6 +115,17 @@ export default {
 </script>
 
 <style scoped>
+.card-body {
+  justify-content: space-between;
+}
+.card-container {
+  max-width: 600px;
+}
+.status {
+  align-items: center;
+  font-size: 2em;
+  display: flex;
+}
 .active {
   color: #2edf69;
   display: flex;

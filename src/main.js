@@ -7,4 +7,7 @@ import store from "./store";
 
 loadFonts();
 
-createApp(App).use(store).use(router).use(vuetify).mount("#app");
+let myApp = createApp(App);
+myApp.config.globalProperties.window = window;
+
+myApp.use(store).use(router).use(vuetify).mount("#app");
