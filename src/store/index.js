@@ -6,7 +6,7 @@ import _ from "lodash";
 import axios from "axios";
 export default createStore({
   state: {
-    current: "akash",
+    current: {},
     chains: {},
     networks: {},
     prices: {},
@@ -122,8 +122,11 @@ export default createStore({
     ],
   },
   getters: {
-    networks(state) {
-      return state.validators;
+    getNetworks(state) {
+      return state.networks;
+    },
+    getCurrentNetwork(state) {
+      return state.current;
     },
     getChains(state) {
       return state.chains;
@@ -131,6 +134,13 @@ export default createStore({
     getApyByName: (state) => (name) => {
       if (state.apys[name]) {
         return (state.apys[name].apy * 100).toFixed(2);
+      } else {
+        return 0;
+      }
+    },
+    getVotingPowerByName: (state) => (name) => {
+      if (state.vps) {
+        return state.vps[name].vp;
       } else {
         return 0;
       }
@@ -147,6 +157,9 @@ export default createStore({
     setChains(state, chains) {
       state.chains = chains;
     },
+    setCurrentChain(state, chain) {
+      state.current = chain;
+    },
     setPrices(state, prices) {
       state.prices = prices;
     },
@@ -156,8 +169,14 @@ export default createStore({
     setApys(state, apys) {
       state.apys = apys;
     },
+    setVps(state, vps) {
+      state.vps = vps;
+    },
   },
   actions: {
+    async setCurrent({ commit }, current) {
+      commit("setCurrentChain", current);
+    },
     async fetchChains({ commit, state }) {
       const directory = CosmosDirectory();
       let chains = await directory.getChains();
@@ -196,15 +215,23 @@ export default createStore({
       commit("setPrices", _.keyBy(chainsPrices, "name"));
     },
     async fetchNetworks({ commit, state, dispatch }) {
-      await dispatch("fetchChains");
-      let chainsArray = Object.values(state.chains);
-      let chainsNetworks = await Promise.all(
-        chainsArray.map(async (chain) => {
-          return await Network(chain);
-        })
-      );
-      console.log(chainsNetworks);
-      commit("setNetworks", _.keyBy(chainsNetworks, "name"));
+      if (state.networks.name) {
+        console.log("Doing Nothings");
+      } else {
+        if (state.chains.name) {
+        } else {
+          await dispatch("fetchChains");
+
+          let chainsArray = Object.values(state.chains);
+          let chainsNetworks = await Promise.all(
+            chainsArray.map(async (chain) => {
+              return await Network(chain);
+            })
+          );
+          console.log(chainsNetworks);
+          commit("setNetworks", _.keyBy(chainsNetworks, "name"));
+        }
+      }
     },
     async fetchApy({ commit, state, dispatch }) {
       await dispatch("fetchNetworks");
@@ -220,6 +247,26 @@ export default createStore({
       );
       console.log(apys);
       commit("setApys", _.keyBy(apys, "name"));
+    },
+    async fetchVp({ commit, state, dispatch }) {
+      await dispatch("fetchNetworks");
+      let validators = state.validators;
+      let vps = await Promise.all(
+        validators.map(async (validator) => {
+          let network = state.networks[validator.name];
+          if (network) {
+            let vp = await network.queryClient.getVotingPower(
+              validator.address,
+              network.decimals
+            );
+            return {
+              vp,
+              name: validator.name,
+            };
+          } else return Promise.resolve({ vp: 0, name: validator.name });
+        })
+      );
+      commit("setVps", _.keyBy(vps, "name"));
     },
   },
   modules: {},

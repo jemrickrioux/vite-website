@@ -1,5 +1,31 @@
 import axios from "axios";
 import _ from "lodash";
+import {
+  setupStakingExtension,
+  QueryClient as CosmjsQueryClient,
+  setupBankExtension,
+  setupDistributionExtension,
+  setupMintExtension,
+  setupGovExtension,
+} from "@cosmjs/stargate";
+import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+
+/**
+ * Make Client
+ *
+ * @returns QueryClient with necessary extensions
+ */
+const makeClient = async (rpc) => {
+  const tmClient = await Tendermint34Client.connect(rpc);
+  return CosmjsQueryClient.withExtensions(
+    tmClient,
+    setupStakingExtension,
+    setupBankExtension,
+    setupDistributionExtension,
+    setupMintExtension,
+    setupGovExtension
+  );
+};
 
 const QueryClient = async (chainId, rpcUrls, restUrls) => {
   const rpcUrl = await findAvailableUrl(
@@ -10,6 +36,8 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     Array.isArray(restUrls) ? restUrls : [restUrls],
     "rest"
   );
+
+  const client = await makeClient(rpcUrl);
 
   const getAllValidators = (pageSize, opts, pageCallback) => {
     return getAllPages((nextKey) => {
@@ -92,6 +120,11 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
         );
         return delegations;
       });
+  };
+
+  const getVotingPower = async (address, decimals) => {
+    let validator = await client.staking.validator(address);
+    return (validator.validator.tokens / 10 ** decimals).toFixed(0);
   };
 
   const getRewards = (address, opts) => {
@@ -207,6 +240,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     connected: !!rpcUrl && !!restUrl,
     rpcUrl,
     restUrl,
+    tmClient: client,
     getAllValidators,
     getValidators,
     getAllValidatorDelegations,
@@ -215,6 +249,7 @@ const QueryClient = async (chainId, rpcUrls, restUrls) => {
     getDelegations,
     getRewards,
     getGrants,
+    getVotingPower,
     getWithdrawAddress,
   };
 };

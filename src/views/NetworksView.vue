@@ -1,6 +1,10 @@
 <template>
   <div class="validator-section">
-    <h2 class="text-h2">Networks we support</h2>
+    <v-row>
+      <v-col>
+        <h2 class="text-h2">Choose the tastiest stake</h2>
+      </v-col>
+    </v-row>
     <v-row>
       <Validator v-for="node in nodes" :key="node.address" :node="node" />
     </v-row>
@@ -9,11 +13,10 @@
 
 <script>
 import Validator from "@/components/Validator.vue";
-import Header from "@/components/Header.vue";
 
 export default {
   name: "HomeView",
-  components: { Validator, Header },
+  components: { Validator },
   data() {
     return {
       nodes: [],

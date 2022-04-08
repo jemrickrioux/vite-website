@@ -13,6 +13,24 @@
         <router-view />
       </v-main>
     </v-container>
+    <v-footer padless>
+      <v-card flat tile width="100%" class="red lighten-1 text-center">
+        <v-card-text>
+          <v-btn v-for="icon in icons" :key="icon" class="mx-4" icon>
+            <v-icon size="24px">
+              {{ icon }}
+            </v-icon>
+          </v-btn>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-text class="white--text">
+          {{ new Date().getFullYear() }} —
+          <strong>Stake Frites (🥩 , 🍟)</strong>
+        </v-card-text>
+      </v-card>
+    </v-footer>
   </v-app>
 </template>
 
@@ -32,9 +50,10 @@ import { mapGetters } from "vuex";
 export default {
   name: "App",
   async created() {
-    await this.$store.dispatch("fetchNetworks");
-    await this.$store.dispatch("fetchApy");
-    await this.$store.dispatch("fetchPrices");
+    //await this.$store.dispatch("fetchNetworks");
+    //await this.$store.dispatch("fetchApy");
+    //await this.$store.dispatch("fetchPrices");
+    await this.$store.dispatch("fetchVp");
   },
   data: () => ({
     //
