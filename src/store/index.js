@@ -1,58 +1,192 @@
 import { createStore } from "vuex";
 
-import CosmosDirectory from "../utils/CosmosDirectory";
-import Network from "../utils/Network";
 import _ from "lodash";
-import axios from "axios";
+
+import {
+  fetchChains,
+  fetchPrices,
+  fetchNetworks,
+  fetchApy,
+  fetchVp,
+  setCurrent,
+} from "./actions";
+
 export default createStore({
   state: {
+    chainLoading: true,
     current: {},
     chains: {},
     networks: {},
-    prices: {},
-    apys: {},
+    net: {
+      akash: {
+        name: "akash",
+        enabled: true,
+        apyEnabled: true,
+        status: "active",
+        address: "akashvaloper1uepjmgfuk6rnd0djsglu88w7d0t49lmlsqkfuf",
+        price: 0,
+        priceLoading: true,
+        networkLoading: true,
+        network: {},
+        apy: 0,
+        apyLoading: true,
+        vp: 0,
+        vpLoading: true,
+      },
+      cerberus: {
+        name: "cerberus",
+        enabled: true,
+        apyEnabled: true,
+        status: "active",
+        address: "cerberusvaloper1zl4vt84hya03e8hu7dx4q4cvn2ts2xdrrnnufr",
+        price: 0,
+        priceLoading: true,
+        networkLoading: true,
+        network: {},
+        apy: 0,
+        apyLoading: true,
+        vp: 0,
+        vpLoading: true,
+      },
+      chihuahua: {
+        name: "chihuahua",
+        enabled: true,
+        apyEnabled: true,
+        status: "active",
+        address: "chihuahuavaloper1zl4vt84hya03e8hu7dx4q4cvn2ts2xdr685p5g",
+        price: 0,
+        priceLoading: true,
+        networkLoading: true,
+        network: {},
+        apy: 0,
+        apyLoading: true,
+        vp: 0,
+        vpLoading: true,
+      },
+      evmos: {
+        name: "evmos",
+        enabled: false,
+        apyEnabled: false,
+        status: "active",
+        address: "evmosvaloper1pz3mcahcrglf3md4lggax5r95gvmppc6x5w7hw",
+        price: 0,
+        priceLoading: true,
+        networkLoading: true,
+        network: {},
+        apy: 0,
+        apyLoading: true,
+        vp: 0,
+        vpLoading: true,
+      },
+      nomic: {
+        name: "nomic",
+        enabled: false,
+        apyEnabled: false,
+        status: "active",
+        address: "nomic1jndxttq5ykp5zc8g3xwnxmchzjtl7ap2avlwkz",
+        price: 0,
+        priceLoading: true,
+        networkLoading: true,
+        network: {},
+        apy: 0,
+        apyLoading: true,
+        vp: 0,
+        vpLoading: true,
+      },
+      lumnetwork: {
+        name: "lumnetwork",
+        enabled: true,
+        apyEnabled: true,
+        status: "active",
+        address: "lumvaloper1kn7zgwex5yr897mp9vy83vm9re53skyhr82s58",
+        price: 0,
+        priceLoading: true,
+        networkLoading: true,
+        network: {},
+        apy: 0,
+        apyLoading: true,
+        vp: 0,
+        vpLoading: true,
+      },
+      sifchain: {
+        name: "sifchain",
+        enabled: true,
+        apyEnabled: true,
+        status: "active",
+        address: "sifvaloper1uepjmgfuk6rnd0djsglu88w7d0t49lmlmxj56z",
+        price: 0,
+        priceLoading: true,
+        networkLoading: true,
+        network: {},
+        apy: 0,
+        apyLoading: true,
+        vp: 0,
+        vpLoading: true,
+      },
+    },
     validators: [
       {
         name: "akash",
         enabled: true,
         apyEnabled: true,
+        status: "active",
         address: "akashvaloper1uepjmgfuk6rnd0djsglu88w7d0t49lmlsqkfuf",
+        price: 0,
+        priceLoading: true,
       },
       {
         name: "cerberus",
         enabled: true,
         apyEnabled: true,
+        status: "active",
         address: "cerberusvaloper1zl4vt84hya03e8hu7dx4q4cvn2ts2xdrrnnufr",
+        price: 0,
+        priceLoading: true,
       },
       {
         name: "chihuahua",
         enabled: true,
         apyEnabled: true,
+        status: "active",
         address: "chihuahuavaloper1zl4vt84hya03e8hu7dx4q4cvn2ts2xdr685p5g",
+        price: 0,
+        priceLoading: true,
       },
       {
         name: "evmos",
         enabled: false,
         apyEnabled: false,
+        status: "active",
         address: "evmosvaloper1pz3mcahcrglf3md4lggax5r95gvmppc6x5w7hw",
+        price: 0,
+        priceLoading: true,
       },
       {
         name: "nomic",
         enabled: false,
         apyEnabled: false,
+        status: "active",
         address: "nomic1jndxttq5ykp5zc8g3xwnxmchzjtl7ap2avlwkz",
+        price: 0,
+        priceLoading: true,
       },
       {
         name: "lumnetwork",
         enabled: true,
         apyEnabled: true,
+        status: "active",
         address: "lumvaloper1kn7zgwex5yr897mp9vy83vm9re53skyhr82s58",
+        price: 0,
+        priceLoading: true,
       },
       {
         name: "sifchain",
         enabled: true,
         apyEnabled: true,
+        status: "active",
         address: "sifvaloper1uepjmgfuk6rnd0djsglu88w7d0t49lmlmxj56z",
+        price: 0,
+        priceLoading: true,
       },
     ],
     node: [
@@ -132,25 +266,13 @@ export default createStore({
       return state.chains;
     },
     getApyByName: (state) => (name) => {
-      if (state.apys[name]) {
-        return (state.apys[name].apy * 100).toFixed(2);
-      } else {
-        return 0;
-      }
+      return (state.net[name].apy * 100).toFixed(2);
     },
     getVotingPowerByName: (state) => (name) => {
-      if (state.vps) {
-        return state.vps[name].vp;
-      } else {
-        return 0;
-      }
+      return state.net[name].vp;
     },
     getPriceByName: (state) => (name) => {
-      if (state.prices[name]) {
-        return state.prices[name].price.toFixed(2);
-      } else {
-        return 0;
-      }
+      return state.net[name].price.toFixed(2);
     },
   },
   mutations: {
@@ -160,114 +282,33 @@ export default createStore({
     setCurrentChain(state, chain) {
       state.current = chain;
     },
-    setPrices(state, prices) {
-      state.prices = prices;
+    setPriceByName(state, { price, name }) {
+      state.net[name].price = price;
+      state.net[name].priceLoading = false;
+    },
+    setNetworkByName(state, { network, name }) {
+      state.net[name].network = network;
+      state.net[name].networkLoading = false;
     },
     setNetworks(state, networks) {
       state.networks = networks;
     },
-    setApys(state, apys) {
-      state.apys = apys;
+    setVotingPowerByName(state, { name, vp }) {
+      state.net[name].vp = vp;
+      state.net[name].vpLoading = false;
     },
-    setVps(state, vps) {
-      state.vps = vps;
+    setApyByName(state, { name, apy }) {
+      state.net[name].apy = apy;
+      state.net[name].apyLoading = false;
     },
   },
   actions: {
-    async setCurrent({ commit }, current) {
-      commit("setCurrentChain", current);
-    },
-    async fetchChains({ commit, state }) {
-      const directory = CosmosDirectory();
-      let chains = await directory.getChains();
-      const networks = state.validators
-        .filter((el) => el.enabled !== false)
-        .map((data) => {
-          const registryData = chains[data.name] || {};
-          return { ...registryData, ...data };
-        });
-      commit(
-        "setChains",
-        _.compact(networks).reduce((a, v) => ({ ...a, [v.name]: v }), {})
-      );
-    },
-    async fetchPrices({ commit, state, dispatch }) {
-      await dispatch("fetchChains");
-      let chainsArray = Object.values(state.chains);
-      let chainsPrices = await Promise.all(
-        chainsArray.map(async (chain) => {
-          let price = await axios.get(
-            "https://api.coingecko.com/api/v3/simple/price",
-            {
-              params: {
-                ids: chain.coingecko_id,
-                vs_currencies: "usd",
-              },
-            }
-          );
-          return {
-            name: chain.name,
-            price: price.data[chain.coingecko_id].usd,
-          };
-        })
-      );
-
-      commit("setPrices", _.keyBy(chainsPrices, "name"));
-    },
-    async fetchNetworks({ commit, state, dispatch }) {
-      if (state.networks.name) {
-        console.log("Doing Nothings");
-      } else {
-        if (state.chains.name) {
-        } else {
-          await dispatch("fetchChains");
-
-          let chainsArray = Object.values(state.chains);
-          let chainsNetworks = await Promise.all(
-            chainsArray.map(async (chain) => {
-              return await Network(chain);
-            })
-          );
-          console.log(chainsNetworks);
-          commit("setNetworks", _.keyBy(chainsNetworks, "name"));
-        }
-      }
-    },
-    async fetchApy({ commit, state, dispatch }) {
-      await dispatch("fetchNetworks");
-      let networks = Object.values(state.networks);
-      let apys = await Promise.all(
-        networks.map(async (network) => {
-          let apy = await network.getApy();
-          return {
-            apy,
-            name: network.name,
-          };
-        })
-      );
-      console.log(apys);
-      commit("setApys", _.keyBy(apys, "name"));
-    },
-    async fetchVp({ commit, state, dispatch }) {
-      await dispatch("fetchNetworks");
-      let validators = state.validators;
-      let vps = await Promise.all(
-        validators.map(async (validator) => {
-          let network = state.networks[validator.name];
-          if (network) {
-            let vp = await network.queryClient.getVotingPower(
-              validator.address,
-              network.decimals
-            );
-            return {
-              vp,
-              name: validator.name,
-            };
-          } else return Promise.resolve({ vp: 0, name: validator.name });
-        })
-      );
-      commit("setVps", _.keyBy(vps, "name"));
-    },
+    setCurrent,
+    fetchChains,
+    fetchPrices,
+    fetchNetworks,
+    fetchApy,
+    fetchVp,
   },
   modules: {},
 });

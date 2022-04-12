@@ -50,9 +50,9 @@ import { mapGetters } from "vuex";
 export default {
   name: "App",
   async created() {
-    //await this.$store.dispatch("fetchNetworks");
-    //await this.$store.dispatch("fetchApy");
-    //await this.$store.dispatch("fetchPrices");
+    await this.$store.dispatch("fetchNetworks");
+    await this.$store.dispatch("fetchApy");
+    await this.$store.dispatch("fetchPrices");
     await this.$store.dispatch("fetchVp");
   },
   data: () => ({
